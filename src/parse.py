@@ -105,13 +105,26 @@ class RTEParser(TableParser):
         extended_data_by_worker: dict[str, dict[str, int]] = {}
         for worker_id in self.data_by_worker:
             extended_data_by_worker[worker_id] = {}
-            for task_id in self.data_by_task:
-                if task_id in self.data_by_worker[worker_id]:
-                    extended_data_by_worker[worker_id][task_id] = self.data_by_worker[worker_id][task_id]
-                elif random.uniform(0, 1) < accuracies[worker_id]:
-                    extended_data_by_worker[worker_id][task_id] = self.data_by_task[task_id].true_label
-                else:
-                    extended_data_by_worker[worker_id][task_id] = -self.data_by_task[task_id].true_label
+            remaining_tasks = set(self.data_by_task.keys())
+
+            # Copy existing data
+            for task_id in self.data_by_worker[worker_id]:
+                extended_data_by_worker[worker_id][task_id] = self.data_by_worker[worker_id][task_id]
+                remaining_tasks.remove(task_id)
+            
+            # Choose correct synthetic tasks
+            remaining_tasks = list(remaining_tasks)
+            tasks_to_choose = int(len(remaining_tasks) * accuracies[worker_id])
+            print(f"[{worker_id}] {tasks_to_choose} / {len(remaining_tasks)} ({accuracies[worker_id]})")
+            while tasks_to_choose > 0:
+                choice = random.randint(0, len(remaining_tasks) - 1)
+                extended_data_by_worker[worker_id][remaining_tasks[choice]] = self.data_by_task[remaining_tasks[choice]].true_label
+                del remaining_tasks[choice]
+                tasks_to_choose -= 1
+            
+            # Fill in incorrect synthetic tasks
+            for task_id in remaining_tasks:
+                extended_data_by_worker[worker_id][task_id] = -self.data_by_task[task_id].true_label
         
         return extended_data_by_worker
     

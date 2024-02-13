@@ -74,7 +74,7 @@ class Evaluator:
         # Perform SVD on extrapolated samples
         extrapolated_trial_errors: dict[int, list[float]] = {}
         extrapolated_dataset: dict[str, dict[str, int]] = self.parser.generate_extrapolated_dataset()
-        extrapolated_sizes = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30]
+        extrapolated_sizes = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 35, 40, 50, 60, 80, 100]
         for size in extrapolated_sizes:
             extrapolated_trial_errors[size] = []
 

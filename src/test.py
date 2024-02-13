@@ -28,11 +28,18 @@ class Tester(unittest.TestCase):
             for task_id in extrapolated[worker_id]:
                 self.assertTrue(extrapolated[worker_id][task_id] == 1 or extrapolated[worker_id][task_id] == -1)
         
-        print("Extrapolation:")
-        subsample = p.generate_extrapolated_subsample(20)
+        subsample = p.generate_extrapolated_subsample(11)
         good = aggregators.SVDAggregator.find_good_worker(extrapolated, p.data_by_task, subsample)
-        aggregators.SVDAggregator.aggregate(extrapolated, subsample, good)
-        print("=========")
+        answer = aggregators.SVDAggregator.aggregate(extrapolated, subsample, good)
+        e = evaluate.Evaluator()
+        error = e.evaluate(answer)
+        print(error)
+
+        subsample = p.generate_subsample(10)
+        good = aggregators.SVDAggregator.find_good_worker(p.data_by_worker, p.data_by_task, subsample)
+        answer = aggregators.SVDAggregator.aggregate(p.data_by_worker, subsample, good)
+        error = e.evaluate(answer)
+        print(error)
     
     def test_perfect_svd(self):
         p = parse.RTEParser()

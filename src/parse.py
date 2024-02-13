@@ -125,7 +125,7 @@ class RTEParser(TableParser):
             for task_id in remaining_tasks:
                 extended_data_by_worker[worker_id][task_id] = -self.data_by_task[task_id].true_label
         
-        # Make sure accuracies have not changed
+        # Make sure accuracies have not changed too much
         for worker_id in extended_data_by_worker:
             correct = 0
             total = 0
@@ -138,11 +138,14 @@ class RTEParser(TableParser):
         return extended_data_by_worker
     
     def generate_extrapolated_subsample(self, size: int) -> dict[str, set[str]]:
-        subsample: dict[str, set[str]] = {}
+        subsample: dict[str, set[str]] = self.generate_subsample(10)
 
         for task_id in self.data_by_task:
             workers = list(self.data_by_worker.keys())
-            chosen_workers: set[str] = set()
+            chosen_workers: set[str] = set(subsample[task_id])
+
+            for worker in chosen_workers:
+                workers.remove(worker)
 
             # Choose some number of workers randomly
             while len(chosen_workers) != size:

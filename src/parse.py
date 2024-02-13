@@ -115,7 +115,6 @@ class RTEParser(TableParser):
             # Choose correct synthetic tasks
             remaining_tasks = list(remaining_tasks)
             tasks_to_choose = int(len(remaining_tasks) * accuracies[worker_id])
-            print(f"[{worker_id}] {tasks_to_choose} / {len(remaining_tasks)} ({accuracies[worker_id]})")
             while tasks_to_choose > 0:
                 choice = random.randint(0, len(remaining_tasks) - 1)
                 extended_data_by_worker[worker_id][remaining_tasks[choice]] = self.data_by_task[remaining_tasks[choice]].true_label

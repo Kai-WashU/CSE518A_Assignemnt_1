@@ -72,27 +72,17 @@ class Evaluator:
         print(self.average_errors)
 
         # Perform SVD on extrapolated samples
-        extra = 1
         extrapolated_trial_errors: dict[int, list[float]] = {}
         extrapolated_dataset: dict[str, dict[str, int]] = self.parser.generate_extrapolated_dataset()
-        while extra < 154:
-            extrapolated_trial_errors[10 + extra] = []
+        extrapolated_sizes = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30]
+        for size in extrapolated_sizes:
+            extrapolated_trial_errors[size] = []
 
             for _ in range(REPITITIONS):
-                subsample = self.parser.generate_extrapolated_subsample(10 + extra)
+                subsample = self.parser.generate_extrapolated_subsample(size)
                 good_worker = aggregators.SVDAggregator.find_good_worker(extrapolated_dataset, self.parser.data_by_task, subsample)
                 aggregations = aggregators.SVDAggregator.aggregate(extrapolated_dataset, subsample, good_worker)
-                extrapolated_trial_errors[10 + extra].append(self.evaluate(aggregations))
-
-            extra += 10
-        
-        # Perform SVD on the full extrapolated matrix
-        extrapolated_trial_errors[164] = []
-        for _ in range(REPITITIONS):
-            subsample = self.parser.generate_extrapolated_subsample(164)
-            good_worker = aggregators.SVDAggregator.find_good_worker(extrapolated_dataset, self.parser.data_by_task, subsample)
-            aggregations = aggregators.SVDAggregator.aggregate(extrapolated_dataset, subsample, good_worker)
-            extrapolated_trial_errors[164].append(self.evaluate(aggregations))
+                extrapolated_trial_errors[size].append(self.evaluate(aggregations))
         
         average_extrapolated_errors: dict[int, float] = {}
         for size in extrapolated_trial_errors:

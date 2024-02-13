@@ -2,6 +2,7 @@ import abc
 import random
 import numpy
 import parse
+import sys
 
 MAX_ITERATIONS = 20
 
@@ -143,14 +144,19 @@ class SVDAggregator(Aggregator):
                   good_worker: str) -> dict[str, int]:
         # Calculate the top eigenvector
         (_, tasks, matrix) = SVDAggregator.convert_to_matrix(data_by_worker, subsample)
-        (u, _, _) = numpy.linalg.svd(matrix)
-        symmetrical_matrix = numpy.matmul(u, numpy.transpose(u))
-        (_, eigenvectors) = numpy.linalg.eig(symmetrical_matrix)
+        symmetrical_matrix = numpy.matmul(matrix, numpy.transpose(matrix))
+        (eigenvalues, eigenvectors) = numpy.linalg.eig(symmetrical_matrix)
+
+        # Find the maximal eigenvalue
+        max_index = 0
+        for index in range(len(eigenvalues)):
+            if eigenvalues[index] > eigenvalues[max_index]:
+                max_index = index
 
         estimates: list[int] = []
         numpy.set_printoptions(threshold=20)
         for task in range(len(tasks)):
-            value = eigenvectors[task][0]
+            value = eigenvectors[task][max_index]
             if value > 0:
                 estimates.append(1)
             elif value < 0:
@@ -196,4 +202,5 @@ class SVDAggregator(Aggregator):
         for task in tasks:
             for worker in subsample[task]:
                 matrix.itemset((tasks[task], workers[worker]), data_by_worker[worker][task])
+                
         return (workers, tasks, matrix)

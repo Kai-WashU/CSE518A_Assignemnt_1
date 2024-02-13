@@ -125,6 +125,16 @@ class RTEParser(TableParser):
             for task_id in remaining_tasks:
                 extended_data_by_worker[worker_id][task_id] = -self.data_by_task[task_id].true_label
         
+        # Make sure accuracies have not changed
+        for worker_id in extended_data_by_worker:
+            correct = 0
+            total = 0
+            for task_id in extended_data_by_worker[worker_id]:
+                total += 1
+                if extended_data_by_worker[worker_id][task_id] == self.data_by_task[task_id].true_label:
+                    correct += 1
+            assert abs(float(correct) / total - accuracies[worker_id]) < 0.01, f"Expected accuracy {accuracies[worker_id]}, got {float(correct) / total}"
+        
         return extended_data_by_worker
     
     def generate_extrapolated_subsample(self, size: int) -> dict[str, set[str]]:
